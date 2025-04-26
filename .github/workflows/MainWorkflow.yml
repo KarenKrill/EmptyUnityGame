@@ -43,6 +43,7 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: ${{ env.PROJECT_NAME }}
       - if: matrix.targetPlatform != 'Android'
         uses: actions/upload-artifact@v4
         with:
