@@ -1,13 +1,11 @@
 name: MainWorkflow
+
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
-
-env:
-  PROJECT_NAME: ${{ github.repository }} | awk -F'[\\\\/]' '{print $2}'
 
 jobs:
   MultiplatformPlatformBuild:
@@ -27,6 +25,10 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+      - name: Set ProjectName variable
+        run: echo PROJECT_NAME=${{ github.repository }} | awk -F'[\\\\/]' '{print $2}' >> $GITHUB_ENV
+      - name: Print ProjectName
+        run: echo ${{ env.PROJECT_NAME }}
       - uses: actions/cache@v4
         with:
           path: Library
@@ -52,4 +54,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PROJECT_NAME }}.${{ matrix.targetPlatform }}.${{ matrix.unityVersion }}
-          path: build/${{ matrix.targetPlatform }}.apk
+          path: build/${{ matrix.targetPlatform }}/Android.apk
