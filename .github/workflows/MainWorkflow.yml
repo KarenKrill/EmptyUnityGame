@@ -27,8 +27,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Print project name
-        run: echo ${{ env.PROJECT_NAME }}
       - uses: actions/cache@v4
         with:
           path: Library
@@ -48,10 +46,10 @@ jobs:
       - if: matrix.targetPlatform != 'Android'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.targetPlatform }}Build(${{ matrix.unityVersion }})
+          name: ${{ env.PROJECT_NAME }}.${{ matrix.targetPlatform }}.${{ matrix.unityVersion }}.Build
           path: build/${{ matrix.targetPlatform }}
       - if: matrix.targetPlatform == 'Android'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.targetPlatform }}Build(${{ matrix.unityVersion }})
-          path: build/${{ matrix.targetPlatform }}/Android.apk
+          name: ${{ env.PROJECT_NAME }}.${{ matrix.targetPlatform }}.${{ matrix.unityVersion }}
+          path: build/${{ matrix.targetPlatform }}.apk
