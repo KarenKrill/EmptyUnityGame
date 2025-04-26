@@ -6,9 +6,6 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-env:
-  PROJECT_PATH: ${{ github.workspace }}
-
 jobs:
   WindowsBasedPlatformsBuild:
     name: ${{ matrix.targetPlatform }} build (${{ matrix.unityVersion }})
@@ -33,7 +30,7 @@ jobs:
         run: echo $PROJECT_PATH
       - uses: actions/cache@v4
         with:
-          path: $PROJECT_PATH/Library
+          path: Library
           key:
             Library-${{ matrix.targetPlatform }}
           restore-keys: |
@@ -45,10 +42,9 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          projectPath: ${{ $PROJECT_PATH }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.targetPlatform }}Build
-          path: $PROJECT_PATH/build/${{ matrix.targetPlatform }}
+          name: ${{ matrix.targetPlatform }}Build(${{ matrix.unityVersion }})
+          path: build/${{ matrix.targetPlatform }}
