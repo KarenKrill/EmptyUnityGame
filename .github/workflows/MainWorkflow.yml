@@ -28,8 +28,8 @@ jobs:
       - name: Obtain ProjectName
         id: ProjectNameCalcStep
         run: |
-            ProjName = ${{ github.repository }} | awk -F'[\\\\/]' '{print $2}'
-            "ProjectName=$ProjName" >> $GITHUB_OUTPUT
+            ProjName=${{ github.repository }} | awk -F'[\\\\/]' '{print $2}'
+            "ProjectName=$ProjName" >> "$GITHUB_OUTPUT"
       - name: Print ProjectName
         run: echo ${{ steps.ProjectNameCalcStep.outputs.ProjectName }}
       - uses: actions/cache@v4
