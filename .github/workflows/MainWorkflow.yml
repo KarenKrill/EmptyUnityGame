@@ -30,10 +30,10 @@ jobs:
         with:
           path: Library
           key:
-            Library-${{ matrix.targetPlatform }}
+            Library-${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}
           restore-keys: |
-            Library-${{ matrix.targetPlatform }}-
-            Library-
+            Library-${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}-
+            Library-${{ matrix.unityVersion }}
       - uses: game-ci/unity-builder@v4
         env:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
