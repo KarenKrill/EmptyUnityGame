@@ -25,13 +25,12 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Obtain ProjectName
-        id: ProjectNameCalcStep
+      - name: Set ProjectName variable
         run: |
             ProjName=$(echo ${{ github.repository }} | awk -F'[\\\\/]' '{print $2}')
-            echo "ProjectName=$ProjName" >> "$GITHUB_OUTPUT"
+            echo "PROJECT_NAME=$ProjName" >> "$GITHUB_ENV"
       - name: Print ProjectName
-        run: echo ${{ steps.ProjectNameCalcStep.outputs.ProjectName }}
+        run: echo ${{ env.PROJECT_NAME }}
       - uses: actions/cache@v4
         with:
           path: Library
