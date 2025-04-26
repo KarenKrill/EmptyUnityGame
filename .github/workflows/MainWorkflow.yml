@@ -5,10 +5,10 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:
+  workflow_dispatch: # to run manually
 
 jobs:
-  MultiplatformPlatformBuild:
+  MultiplatformBuild:
     name: ${{ matrix.targetPlatform }} build (${{ matrix.unityVersion }})
     runs-on: ubuntu-latest
     strategy:
@@ -44,13 +44,7 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           buildName: ${{ env.PROJECT_NAME }}
-      - if: matrix.targetPlatform != 'Android'
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PROJECT_NAME }}.${{ matrix.targetPlatform }}.${{ matrix.unityVersion }}.Build
           path: build/${{ matrix.targetPlatform }}
-      - if: matrix.targetPlatform == 'Android'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.PROJECT_NAME }}.${{ matrix.targetPlatform }}.${{ matrix.unityVersion }}
-          path: build/${{ matrix.targetPlatform }}/${{ env.PROJECT_NAME }}.apk
