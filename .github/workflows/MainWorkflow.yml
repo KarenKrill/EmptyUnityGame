@@ -21,6 +21,7 @@ jobs:
           - Android # Build an Android player.
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
     steps:
+      - uses: jlumbroso/free-disk-space@v1.3.1
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
