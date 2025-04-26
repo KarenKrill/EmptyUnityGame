@@ -22,11 +22,11 @@ jobs:
           lfs: true
       - name: Event name
         run: echo Triggered by ${{ github.event_name }}
-      - if: ${{ github.event_name }} == 'push'
-        name: Print Git push event
-        run: echo ${{ github.event.push }}
-      - if: ${{ github.event_name }} == 'pull_request'
-        name: Print Git pull request event
+      - name: Print Git push event
+        if: ${{ github.event_name }} == 'push'
+        run: echo ${{ github.push }}
+      - name: Print Git pull request event
+        if: ${{ github.event_name }} == 'pull_request'
         run: echo ${{ github.event.pull_request }}
       - name: Print gh list
         run: echo $(gh run list)
