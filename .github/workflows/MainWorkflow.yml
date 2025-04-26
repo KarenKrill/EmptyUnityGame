@@ -17,7 +17,7 @@ jobs:
           - EmptyUnityGame
         unityVersion:
           - 2022.3.38f1
-          - 6000.1.0f1
+          - 6000.0.47f1
         targetPlatform:
           - Android # Build an Android player.
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
