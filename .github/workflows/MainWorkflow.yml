@@ -25,6 +25,8 @@ jobs:
       - name: Print Git push event
         if: github.event_name == 'push'
         run: echo "${{ github.event.push }}"
+      - name: Print ref
+        run: echo ${{ github.ref_name }}
       - name: Print Git pull request event
         if: github.event_name == 'pull_request'
         run: echo "${{ github.event.pull_request }}"
