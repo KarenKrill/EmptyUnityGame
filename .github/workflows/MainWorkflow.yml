@@ -53,4 +53,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PROJECT_NAME }}.${{ matrix.targetPlatform }}.${{ matrix.unityVersion }}
-          path: build/${{ matrix.targetPlatform }}/Android.apk
+          path: build/${{ matrix.targetPlatform }}/${{ env.PROJECT_NAME }}.apk
