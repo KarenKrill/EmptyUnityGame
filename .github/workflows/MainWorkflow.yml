@@ -23,10 +23,10 @@ jobs:
       - name: Event name
         run: echo Triggered by ${{ github.event_name }}
       - name: Print Git push event
-        if: ${{ github.event_name }} == 'push'
+        if: github.event_name == 'push'
         run: echo ${{ github.push }}
       - name: Print Git pull request event
-        if: ${{ github.event_name }} == 'pull_request'
+        if: github.event_name == 'pull_request'
         run: echo ${{ github.event.pull_request }}
       - name: Print gh list
         run: echo $(gh run list)
