@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  WindowsBasedPlatformsBuild:
+  MultiplatformPlatformBuild:
     name: ${{ matrix.targetPlatform }} build (${{ matrix.unityVersion }})
     runs-on: windows-2022
     strategy:
