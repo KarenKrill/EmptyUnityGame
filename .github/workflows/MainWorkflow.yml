@@ -58,10 +58,10 @@ jobs:
           echo MINOR_CHANGE=$((env.MINOR_CHANGE - env.PREVIOUS_MINOR_CHANGE)) >> $GITHUB_ENV
           echo PATCH_CHANGE=$((env.PATCH_CHANGE - env.PREVIOUS_PATCH_CHANGE)) >> $GITHUB_ENV
       - name: Create release
-        if: startsWith(github.ref, 'refs/tags/') && env.MAJOR_VERSION > 0 && (MAJOR_CHANGE != 0 || MINOR_CHANGE != 0)
+        if: startsWith(github.ref, 'refs/tags/') && env.MAJOR_VERSION > 0 && (env.MAJOR_CHANGE != 0 || env.MINOR_CHANGE != 0)
         run: |
           echo Release created
       - name: Create pre-release
-        if: startsWith(github.ref, 'refs/tags/') && env.MAJOR_VERSION == 0 && MINOR_CHANGE != 0
+        if: startsWith(github.ref, 'refs/tags/') && env.MAJOR_VERSION == 0 && env.MINOR_CHANGE != 0
         run: |
           echo Pre-release created
