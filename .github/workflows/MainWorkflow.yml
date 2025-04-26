@@ -22,6 +22,8 @@ jobs:
           lfs: true
       - name: Print Git event
         run: echo ${{ github.event }}
+      - name: Event name
+        run: echo Triggered by ${{ github.event_name }}
       - name: Print gh list
         run: echo $(gh run list)
         env:
