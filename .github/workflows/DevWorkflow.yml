@@ -1,10 +1,10 @@
-name: MainWorkflow
+name: DevWorkflow
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "dev" ]
   workflow_dispatch: # to run manually
 
 jobs:
