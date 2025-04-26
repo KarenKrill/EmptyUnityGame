@@ -46,6 +46,6 @@ jobs:
           echo $(git tag --sort "-creatordate" | cut -d$'\n' -f1)
           echo $(git tag --sort "-creatordate" | cut -d$'\n' -f2)
           echo $(git tag --sort "-creatordate" | cut -d$'\n' -f3)
-          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f1 | cut -d. -f1)
+          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f1)
           echo $(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f2)
-          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f3 | cut -d. -f3)
+          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f3)
