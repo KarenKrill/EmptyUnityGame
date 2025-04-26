@@ -36,16 +36,17 @@ jobs:
         run: echo $(gh run list)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create release
+      - name: Obtain version info
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          echo Release created
-          echo $(git tag --sort version:refname)
-          echo $(git tag --sort "-committerdate")
-          echo $(git tag --sort "-creatordate")
-          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f1)
-          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f2)
-          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f3)
-          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f1)
-          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f2)
-          echo $(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f3)
+          echo MAJOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f1 | cut -d. -f1) >> $GITHUB_ENV
+          echo MINOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f1 | cut -d. -f2) >> $GITHUB_ENV
+          echo PATCH_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f1 | cut -d. -f3) >> $GITHUB_ENV
+          echo PREVIOUS_MAJOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f1) >> $GITHUB_ENV
+          echo PREVIOUS_MINOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f2) >> $GITHUB_ENV
+          echo PREVIOUS_PATCH_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f3) >> $GITHUB_ENV
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/') && env.MAJOR_VERSION
+        run: |
+          echo CurrentVerison = ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.PATCH_VERSION }}
+          echo PreviousVerison = ${{ env.PREVIOUS_MAJOR_VERSION }}.${{ env.PREVIOUS_MINOR_VERSION }}.${{ env.PREVIOUS_PATCH_VERSION }}
