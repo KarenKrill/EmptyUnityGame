@@ -16,8 +16,8 @@ jobs:
         projectPath:
           - EmptyUnityGame
         unityVersion:
-          - 2020.2.1f1
           - 2022.3.38f1
+          - 6000.1.0f1
         targetPlatform:
           - Android # Build an Android player.
           - StandaloneWindows64 # Build a Windows 64-bit standalone.
