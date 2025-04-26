@@ -39,7 +39,7 @@ jobs:
       - name: Obtain version info
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          echo MAJOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f1 | cut -d. -f1 | sad -e "s/^v//") >> $GITHUB_ENV
+          echo MAJOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f1 | cut -d. -f1 | sed -e "s/^v//") >> $GITHUB_ENV
           echo MINOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f1 | cut -d. -f2) >> $GITHUB_ENV
           echo PATCH_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f1 | cut -d. -f3) >> $GITHUB_ENV
           echo PREVIOUS_MAJOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f1)#v >> $GITHUB_ENV
