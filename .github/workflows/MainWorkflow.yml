@@ -9,7 +9,7 @@ on:
 jobs:
   MultiplatformPlatformBuild:
     name: ${{ matrix.targetPlatform }} build (${{ matrix.unityVersion }})
-    runs-on: windows-2022
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
