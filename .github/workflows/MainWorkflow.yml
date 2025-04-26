@@ -6,6 +6,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+env:
+  PROJECT_NAME: ${{ github.repository }} | awk -F'[\\\\/]' '{print $2}'
+
 jobs:
   MultiplatformPlatformBuild:
     name: ${{ matrix.targetPlatform }} build (${{ matrix.unityVersion }})
@@ -13,8 +16,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        projectPath:
-          - EmptyUnityGame
         unityVersion:
           - 2022.3.38f1
           - 6000.0.47f1
@@ -26,6 +27,8 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
+      - name: Print project name
+        run: echo ${{ env.PROJECT_NAME }}
       - uses: actions/cache@v4
         with:
           path: Library
