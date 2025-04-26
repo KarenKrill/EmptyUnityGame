@@ -24,3 +24,5 @@ jobs:
         run: echo ${{ github.event }}
       - name: Print gh list
         run: echo $(gh run list)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
