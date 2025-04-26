@@ -46,8 +46,12 @@ jobs:
           echo PREVIOUS_MAJOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f1 | sed -e "s/^v//") >> $GITHUB_ENV
           echo PREVIOUS_MINOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f2) >> $GITHUB_ENV
           echo PREVIOUS_PATCH_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f3) >> $GITHUB_ENV
-      - name: Create release
-        if: startsWith(github.ref, 'refs/tags/') && env.MAJOR_VERSION
+      - name: Print versions
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           echo CurrentVerison = ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.PATCH_VERSION }}
           echo PreviousVerison = ${{ env.PREVIOUS_MAJOR_VERSION }}.${{ env.PREVIOUS_MINOR_VERSION }}.${{ env.PREVIOUS_PATCH_VERSION }}
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/') && env.MAJOR_VERSION > 0 && (env.MAJOR_VERSION - env.PREVIOUS_MAJOR_VERSION != 0 || env.MINOR_VERSION - env.PREVIOUS_MINOR_VERSION == 0)
+        run: |
+          echo Release created
