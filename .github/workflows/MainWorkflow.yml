@@ -45,7 +45,7 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          projectPath: $PROJECT_PATH
+          projectPath: ${{ $PROJECT_PATH }}
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
       - uses: actions/upload-artifact@v4
