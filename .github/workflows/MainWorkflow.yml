@@ -79,7 +79,7 @@ jobs:
           echo "BUILD_RUN_ID = $BUILD_RUN_ID"
       - name: No found completed build run
         if: env.BUILD_RUN_ID != ''
-        run: exit 0
+        run: exit 1
       - name: Download artifacts
         run: |
           mkdir -p artifacts
