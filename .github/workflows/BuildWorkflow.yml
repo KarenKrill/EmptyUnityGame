@@ -25,15 +25,25 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Print HEAD SHA
+      - name: Set environment variables
         run: |
-          HeadCommitSha=$(git rev-parse HEAD)
-          echo HeadCommitSha = $HeadCommitSha
-      - name: Set PROJECT_NAME environment variable
-        run: echo PROJECT_NAME=$(echo ${{ github.repository }} | awk -F'[\\\\/]' '{print $2}') >> $GITHUB_ENV
-      - name: Print PROJECT_NAME
-        run: echo ${{ env.PROJECT_NAME }}
-      - uses: actions/cache@v4
+          echo HEAD_COMMIT_SHA=$(git rev-parse HEAD) >> $GITHUB_ENV
+          echo PROJECT_NAME=${GITHUB_REPOSITORY#*/} >> $GITHUB_ENV
+      - name: Print environment variables
+        run: |
+          echo HEAD_COMMIT_SHA=${{ env.HEAD_COMMIT_SHA }}
+          echo PROJECT_NAME=${{ env.PROJECT_NAME }}
+      - name: Get latest successful run ID
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo OVERRUN=$(gh run list --commit $HEAD_COMMIT_SHA --workflow="BuildWorkflow.yml") >> $GITHUB_ENV
+          echo "Overrun = $OVERRUN"
+      - name: Exit if overrun detect
+        if: env.OVERRUN != ''
+        run: exit_with_success
+      - name: Restore Library directory from cache
+        uses: actions/cache@v4
         with:
           path: Library
           key:
@@ -41,9 +51,11 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}-
             Library-${{ runner.os }}-${{ matrix.unityVersion }}-
-      - if: matrix.targetPlatform == 'Android'
+      - name: Free disk space before Android build
+        if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.1
-      - uses: game-ci/unity-builder@v4
+      - name: Build project
+        uses: game-ci/unity-builder@v4
         env:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -52,7 +64,8 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
           buildName: ${{ env.PROJECT_NAME }}
-      - uses: actions/upload-artifact@v4
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.PROJECT_NAME }}.${{ matrix.targetPlatform }}.${{ matrix.unityVersion }}.Build
           path: build/${{ matrix.targetPlatform }}
