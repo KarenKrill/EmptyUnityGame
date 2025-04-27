@@ -55,6 +55,8 @@ jobs:
             fi
     outputs:
       WORKFLOW_CANCELLED: ${{ steps.DetectWorkflowCancel.outputs.WORKFLOW_CANCELLED }}
+      MAJOR_VERSION: ${{ env.MAJOR_VERSION }}
+      TAG_COMMIT_SHA: ${{ env.TAG_COMMIT_SHA }}
   Prepare:
     needs: [DetectCancelConditions]
     if: needs.DetectCancelConditions.result == 'success' && needs.DetectCancelConditions.outputs.WORKFLOW_CANCELLED == 0
@@ -66,7 +68,7 @@ jobs:
           fetch-depth: 0
           lfs: true
       - name: Create release
-        if: env.MAJOR_VERSION > 0
+        if: needs.DetectCancelConditions.outputs.MAJOR_VERSION > 0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
@@ -77,7 +79,7 @@ jobs:
             --generate-notes \
             --draft
       - name: Create pre-release
-        if: env.MAJOR_VERSION == 0 && env.MINOR_CHANGE != 0
+        if: needs.DetectCancelConditions.outputs.MAJOR_VERSION == 0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
@@ -91,8 +93,9 @@ jobs:
       - name: Find build run id
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_COMMIT_SHA: ${{ needs.DetectCancelConditions.outputs.TAG_COMMIT_SHA }}
         run: |
-          echo BUILD_RUN_ID=$(gh run list --commit 863ecfd5d4401f44f5721f1317c1bb771d45da60 --status success --workflow=${{ env.BUILD_WORKFLOW_NAME }} --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
+          echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --status success --workflow=${{ env.BUILD_WORKFLOW_NAME }} --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
           echo "BUILD_RUN_ID = $BUILD_RUN_ID"
       - name: No found completed build run
         if: env.BUILD_RUN_ID != ''
