@@ -45,8 +45,11 @@ jobs:
           echo MAJOR_CHANGE = ${{ env.MAJOR_CHANGE }}
           echo MINOR_CHANGE = ${{ env.MINOR_CHANGE }}
           echo PATCH_CHANGE = ${{ env.PATCH_CHANGE }}
+      - name: There are no significant changes for release
+        if: env.MAJOR_CHANGE == 0 && env.MINOR_CHANGE == 0
+        run: exit 0
       - name: Create release
-        if: env.MAJOR_VERSION > 0 && (env.MAJOR_CHANGE != 0 || env.MINOR_CHANGE != 0)
+        if: env.MAJOR_VERSION > 0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
