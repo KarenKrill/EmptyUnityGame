@@ -1,0 +1,81 @@
+name: MainWorkflow
+
+on:
+  push:
+    branches: ["main"]
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  workflow_dispatch: # to run manually
+
+jobs:
+  MultiplatformBuild:
+    if: startsWith(github.ref, 'refs/tags/')
+    name: Deploy to GitHub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+      - name: Event name
+        run: echo Triggered by ${{ github.event_name }}
+      - name: Print Git push event
+        if: github.event_name == 'push'
+        run: echo "${{ github.event.push }}"
+      - name: Print ref
+        run: echo ${{ github.ref }}
+      - name: Print ref name
+        run: echo ${{ github.ref_name }}
+      - name: Print Git pull request event
+        if: github.event_name == 'pull_request'
+        run: echo "${{ github.event.pull_request }}"
+      - name: Print gh list
+        run: echo $(gh run list)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Obtain version info
+        run: |
+          echo $(git tag --sort "-creatordate")
+          echo MAJOR_VERSION=$(echo ${{ github.ref_name }} | cut -d. -f1 | sed -e "s/^v//") >> $GITHUB_ENV
+          echo MINOR_VERSION=$(echo ${{ github.ref_name }} | cut -d. -f2) >> $GITHUB_ENV
+          echo PATCH_VERSION=$(echo ${{ github.ref_name }} | cut -d. -f3) >> $GITHUB_ENV
+          echo PREVIOUS_MAJOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f1 | sed -e "s/^v//") >> $GITHUB_ENV
+          echo PREVIOUS_MINOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f2) >> $GITHUB_ENV
+          echo PREVIOUS_PATCH_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f3) >> $GITHUB_ENV
+      - name: Print versions
+        run: |
+          echo CurrentVerison = ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.PATCH_VERSION }}
+          echo PreviousVerison = ${{ env.PREVIOUS_MAJOR_VERSION }}.${{ env.PREVIOUS_MINOR_VERSION }}.${{ env.PREVIOUS_PATCH_VERSION }}
+      - name: Compare versions
+        run: |
+          echo MAJOR_CHANGE=$(($MAJOR_VERSION - $PREVIOUS_MAJOR_VERSION)) >> $GITHUB_ENV
+          echo MINOR_CHANGE=$(($MINOR_VERSION - $PREVIOUS_MINOR_VERSION)) >> $GITHUB_ENV
+          echo PATCH_CHANGE=$(($PATCH_VERSION - $PREVIOUS_PATCH_VERSION)) >> $GITHUB_ENV
+      - name: Print versions diffs
+        run: |
+          echo MAJOR_CHANGE = ${{ env.MAJOR_CHANGE }}
+          echo MINOR_CHANGE = ${{ env.MINOR_CHANGE }}
+          echo PATCH_CHANGE = ${{ env.PATCH_CHANGE }}
+      - name: Create release
+        if: env.MAJOR_VERSION > 0 && (env.MAJOR_CHANGE != 0 || env.MINOR_CHANGE != 0)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+            --generate-notes \
+            --draft
+      - name: Create pre-release
+        if: env.MAJOR_VERSION == 0 && env.MINOR_CHANGE != 0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+          gh release create "$tag" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
+            --generate-notes \
+            --draft \
+            --prerelease
