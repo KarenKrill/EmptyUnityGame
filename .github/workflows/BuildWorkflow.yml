@@ -38,7 +38,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo RUN_COUNT=$(gh run list --commit ${{ env.HEAD_COMMIT_SHA }} --workflow="BuildWorkflow.yml" | wc -l) >> $GITHUB_ENV
-          echo "RUN_COUNT = RUN_COUNT"
+          echo "RUN_COUNT = $RUN_COUNT"
       - name: Exit if overrun detect
         if: env.RUN_COUNT > 1
         run: exit 1

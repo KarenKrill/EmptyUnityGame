@@ -42,6 +42,7 @@ jobs:
           echo PREVIOUS_MAJOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f1 | sed -e "s/^v//") >> $GITHUB_ENV
           echo PREVIOUS_MINOR_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f2) >> $GITHUB_ENV
           echo PREVIOUS_PATCH_VERSION=$(git tag --sort "-creatordate" | cut -d$'\n' -f2 | cut -d. -f3) >> $GITHUB_ENV
+          echo TAG_COMMIT_SHA=$(git show -s '${{ github.ref_name }}^{commit}' --format='%H') >> $GITHUB_ENV
       - name: Print versions
         run: |
           echo CurrentVerison = ${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ env.PATCH_VERSION }}
@@ -79,3 +80,12 @@ jobs:
             --generate-notes \
             --draft \
             --prerelease
+      - name: Find build run id
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --status success --workflow="BuildWorkflow.yml" --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
+          echo "BUILD_RUN_ID = BUILD_RUN_ID"
+      - name: Upload artifacts if exists
+        if: env.BUILD_RUN_ID != ''
+        run: exit 0
