@@ -41,7 +41,7 @@ jobs:
           echo "Overrun = $OVERRUN"
       - name: Exit if overrun detect
         if: env.OVERRUN != ''
-        run: exit_with_success
+        run: exit 1
       - name: Restore Library directory from cache
         uses: actions/cache@v4
         with:
