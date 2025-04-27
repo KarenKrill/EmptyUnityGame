@@ -48,7 +48,7 @@ jobs:
       - name: There are no significant changes for release
         id: DetectWorkflowCancel
         run: |
-            if(($MAJOR_CHANGE == 0 && $MINOR_CHANGE == 0)); then
+            if ((${{ env.MAJOR_CHANGE }} == 0 && ${{ env.MINOR_CHANGE }} == 0)); then
                 echo WORKFLOW_CANCELLED=1 >> $GITHUB_OUTPUT
             else
                 echo WORKFLOW_CANCELLED=0 >> $GITHUB_OUTPUT
