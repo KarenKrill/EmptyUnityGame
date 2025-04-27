@@ -72,7 +72,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo BUILD_RUN_ID=$(gh run list --commit 863ecfd5d4401f44f5721f1317c1bb771d45da60 --status success --workflow=$BUILD_WORKFLOW_NAME --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
+          echo BUILD_RUN_ID=$(gh run list --commit 863ecfd5d4401f44f5721f1317c1bb771d45da60 --status success --workflow=${{ env.BUILD_WORKFLOW_NAME }} --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
           echo "BUILD_RUN_ID = $BUILD_RUN_ID"
       - name: No found completed build run
         if: env.BUILD_RUN_ID != ''
@@ -91,10 +91,10 @@ jobs:
                 FILES_COUNT=$(($(ls "$BUILD_DIR" -1a | wc -l) - 2))
                 if (($FILES_COUNT == 1)); then # no need to pack a single file
                     FILENAME=$(ls "$BUILD_DIR" -1a | head -n 3 | tail -n 1) ## there are 3 files: ".", ".." and "single build file"
-                    echo $BUILD_DIR/$FILENAME moved to ${BUILD_DIR%*BUILD_DIRECTORY_POSTFIX}.${FILENAME##*.}
-                    mv "$BUILD_DIR/$FILENAME" "${BUILD_DIR%*BUILD_DIRECTORY_POSTFIX}.${FILENAME##*.}"
+                    echo $BUILD_DIR/$FILENAME moved to ${BUILD_DIR%*$BUILD_DIRECTORY_POSTFIX}.${FILENAME##*.}
+                    mv "$BUILD_DIR/$FILENAME" "${BUILD_DIR%*$BUILD_DIRECTORY_POSTFIX}.${FILENAME##*.}"
                 else # pack build files (except DontShip dir)
-                    BUILD_PACK_NAME="${BUILD_DIR%*BUILD_DIRECTORY_POSTFIX}.zip"
+                    BUILD_PACK_NAME="${BUILD_DIR%*$BUILD_DIRECTORY_POSTFIX}.zip"
                     echo $BUILD_PACK_NAME packing...
                     echo "Exclude: $BUILD_DIR/*DontShip*"
                     zip -r "$BUILD_PACK_NAME" "$BUILD_DIR" -x "$BUILD_DIR/*DontShip*"
