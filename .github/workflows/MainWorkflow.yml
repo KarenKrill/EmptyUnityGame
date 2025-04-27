@@ -86,6 +86,33 @@ jobs:
         run: |
           echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --status success --workflow="BuildWorkflow.yml" --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
           echo "BUILD_RUN_ID = $BUILD_RUN_ID"
-      - name: Upload artifacts if exists
+      - name: No found completed build run
         if: env.BUILD_RUN_ID != ''
         run: exit 0
+      - name: Download artifacts
+        run: |
+          mkdir -p artifacts
+          gh run download $BUILD_RUN_ID --dir artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: List artifacts
+        run: |
+            cd "artifacts"
+            for FILE in */; do
+              if [ -d "$FILE" ]; then
+                ARCHIVE="${FILE%/}.zip"
+                echo "$ARCHIVE packing/unpacking..."
+                zip -r "$ARCHIVE" "$FILE" && rm -rf "$FILE"
+              fi
+            done
+            echo "Artifacts list:"
+            ls -l
+            cd ..
+      - name: Upload artifacts to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for ARTIFACT in artifacts/*; do
+            echo "Uploading $ARTIFACT"
+            gh release upload "${{ github.ref_name }}" "$ARTIFACT" --repo "${{ github.repository }}"
+          done
