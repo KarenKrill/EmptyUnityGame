@@ -85,7 +85,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --status success --workflow="BuildWorkflow.yml" --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
-          echo "BUILD_RUN_ID = BUILD_RUN_ID"
+          echo "BUILD_RUN_ID = $BUILD_RUN_ID"
       - name: Upload artifacts if exists
         if: env.BUILD_RUN_ID != ''
         run: exit 0
