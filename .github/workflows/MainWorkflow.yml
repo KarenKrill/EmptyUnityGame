@@ -111,6 +111,7 @@ jobs:
                     echo "Exclude: $BUILD_DIR/*DontShip*"
                     zip -r "$ARCHIVE" "$BUILD_DIR" -x "$BUILD_DIR/*DontShip*"
                 fi
+                rm -rf "$BUILD_DIR"
               fi
             done
             echo "Packs list:"
