@@ -14,7 +14,7 @@ env:
 jobs:
   DetectCancelConditions:
     if: startsWith(github.ref, 'refs/tags/')
-    name: Deploy to GitHub
+    name: DetectCancelConditions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,7 +54,7 @@ jobs:
                 echo WORKFLOW_CANCELLED=0 >> $GITHUB_OUTPUT
             fi
     outputs:
-      WORKFLOW_CANCELLED: steps.DetectWorkflowCancel.WORKFLOW_CANCELLED
+      WORKFLOW_CANCELLED: ${{ steps.DetectWorkflowCancel.outputs.WORKFLOW_CANCELLED }}
   Prepare:
     needs: [DetectCancelConditions]
     if: needs.DetectCancelConditions.result == 'success' && needs.DetectCancelConditions.outputs.WORKFLOW_CANCELLED == 0
