@@ -17,22 +17,6 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Event name
-        run: echo Triggered by ${{ github.event_name }}
-      - name: Print Git push event
-        if: github.event_name == 'push'
-        run: echo "${{ github.event.push }}"
-      - name: Print ref
-        run: echo ${{ github.ref }}
-      - name: Print ref name
-        run: echo ${{ github.ref_name }}
-      - name: Print Git pull request event
-        if: github.event_name == 'pull_request'
-        run: echo "${{ github.event.pull_request }}"
-      - name: Print gh list
-        run: echo $(gh run list)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Obtain version info
         run: |
           echo $(git tag --sort "-creatordate")
@@ -103,13 +87,13 @@ jobs:
                 FILES_COUNT=$(($(ls "$BUILD_DIR" -1a | wc -l) - 2))
                 if (($FILES_COUNT == 1)); then # no need to pack a single file
                     FILENAME=$(ls "$BUILD_DIR" -1a | head -n 3 | tail -n 1)
-                    echo $BUILD_DIR/$FILENAME moved to $BUILD_DIR.${FILENAME##*.}
-                    mv "$BUILD_DIR/$FILENAME" "$BUILD_DIR.${FILENAME##*.}"
+                    echo $BUILD_DIR/$FILENAME moved to ${BUILD_DIR%*Build}.${FILENAME##*.}
+                    mv "$BUILD_DIR/$FILENAME" "${BUILD_DIR%*Build}.${FILENAME##*.}"
                 else # pack build files (except DontShip dir)
-                    ARCHIVE="$BUILD_DIR.zip"
-                    echo $ARCHIVE packing...
+                    BUILD_PACK_NAME="${BUILD_DIR%*Build}.zip"
+                    echo $BUILD_PACK_NAME packing...
                     echo "Exclude: $BUILD_DIR/*DontShip*"
-                    zip -r "$ARCHIVE" "$BUILD_DIR" -x "$BUILD_DIR/*DontShip*"
+                    zip -r "$BUILD_PACK_NAME" "$BUILD_DIR" -x "$BUILD_DIR/*DontShip*"
                 fi
                 rm -rf "$BUILD_DIR"
               fi
