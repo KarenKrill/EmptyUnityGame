@@ -84,7 +84,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --status success --workflow="BuildWorkflow.yml" --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
+          echo BUILD_RUN_ID=$(gh run list --commit 863ecfd5d4401f44f5721f1317c1bb771d45da60 --status success --workflow="BuildWorkflow.yml" --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
           echo "BUILD_RUN_ID = $BUILD_RUN_ID"
       - name: No found completed build run
         if: env.BUILD_RUN_ID != ''
@@ -95,24 +95,32 @@ jobs:
           gh run download $BUILD_RUN_ID --dir artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: List artifacts
+      - name: Builds packing
         run: |
-            cd "artifacts"
-            for FILE in */; do
-              if [ -d "$FILE" ]; then
-                ARCHIVE="${FILE%/}.zip"
-                echo "$ARCHIVE packing/unpacking..."
-                zip -r "$ARCHIVE" "$FILE" && rm -rf "$FILE"
+            cd artifacts
+            for BUILD_DIR in *; do
+              if [ -d "$BUILD_DIR" ]; then
+                FILES_COUNT=$(($(ls "$BUILD_DIR" -1a | wc -l) - 2))
+                if (($FILES_COUNT == 1)); then # no need to pack a single file
+                    FILENAME=$(ls "$BUILD_DIR" -1a | head -n 3 | tail -n 1)
+                    echo $BUILD_DIR/$FILENAME moved to $BUILD_DIR.${FILENAME##*.}
+                    mv "$BUILD_DIR/$FILENAME" "$BUILD_DIR.${FILENAME##*.}"
+                else # pack build files (except DontShip dir)
+                    ARCHIVE="$BUILD_DIR.zip"
+                    echo $ARCHIVE packing...
+                    echo "Exclude: $BUILD_DIR/*DontShip*"
+                    zip -r "$ARCHIVE" "$BUILD_DIR" -x "$BUILD_DIR/*DontShip*"
+                fi
               fi
             done
-            echo "Artifacts list:"
+            echo "Packs list:"
             ls -l
             cd ..
       - name: Upload artifacts to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          for ARTIFACT in artifacts/*; do
-            echo "Uploading $ARTIFACT"
-            gh release upload "${{ github.ref_name }}" "$ARTIFACT" --repo "${{ github.repository }}"
+          for BUILD_PACK in artifacts/*; do
+            echo "Uploading $BUILD_PACK"
+            gh release upload "${{ github.ref_name }}" "$BUILD_PACK" --repo "${{ github.repository }}"
           done
