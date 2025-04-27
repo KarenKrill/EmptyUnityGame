@@ -73,11 +73,12 @@ jobs:
           TAG_COMMIT_SHA: ${{ needs.AnalyseVersions.outputs.TAG_COMMIT_SHA }}
         run: |
           echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --status success --workflow=${{ env.BUILD_WORKFLOW_NAME }} --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
-          echo "BUILD_RUN_ID = $BUILD_RUN_ID"
+      - name: Print build run id
+        run: echo "BUILD_RUN_ID = $BUILD_RUN_ID"
       - name: Builds for release found
         id: ReleaseBuildsFound
         run: |
-            if ((${{ env.BUILD_RUN_ID }} == '')); then
+            if (${{ env.BUILD_RUN_ID }} == ''); then
                 echo WORKFLOW_CANCELLED=1 >> $GITHUB_OUTPUT
             else
                 echo WORKFLOW_CANCELLED=0 >> $GITHUB_OUTPUT
