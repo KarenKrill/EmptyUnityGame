@@ -37,10 +37,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo OVERRUN=$(gh run list --commit ${{ env.HEAD_COMMIT_SHA }} --workflow="BuildWorkflow.yml") >> $GITHUB_ENV
-          echo "Overrun = $OVERRUN"
+          echo RUN_COUNT=$(gh run list --commit ${{ env.HEAD_COMMIT_SHA }} --workflow="BuildWorkflow.yml" | wc -l) >> $GITHUB_ENV
+          echo "RUN_COUNT = RUN_COUNT"
       - name: Exit if overrun detect
-        if: env.OVERRUN != ''
+        if: env.RUN_COUNT > 1
         run: exit 1
       - name: Restore Library directory from cache
         uses: actions/cache@v4
