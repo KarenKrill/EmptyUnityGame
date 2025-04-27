@@ -78,7 +78,7 @@ jobs:
       - name: Builds for release found
         id: ReleaseBuildsFound
         run: |
-            if if [[ ${${{ env.BUILD_RUN_ID }}:+x} ]]; then
+            if [[ ${${{ env.BUILD_RUN_ID }}:+x} ]]; then
                 echo WORKFLOW_CANCELLED=0 >> $GITHUB_OUTPUT
             else
                 echo WORKFLOW_CANCELLED=1 >> $GITHUB_OUTPUT
