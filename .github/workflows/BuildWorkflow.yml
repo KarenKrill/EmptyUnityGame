@@ -31,8 +31,17 @@ jobs:
           echo PROJECT_NAME=${GITHUB_REPOSITORY#*/} >> $GITHUB_ENV
       - name: Print environment variables
         run: |
-          echo HEAD_COMMIT_SHA=${{ env.HeadCommitSha }}
+          echo HEAD_COMMIT_SHA=${{ env.HEAD_COMMIT_SHA }}
           echo PROJECT_NAME=${{ env.PROJECT_NAME }}
+      - name: Get latest successful run ID
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo OVERRUN=$(gh run list --commit $HEAD_COMMIT_SHA --workflow="BuildWorkflow.yml") >> $GITHUB_ENV
+          echo "Overrun = $OVERRUN"
+      - name: Exit if overrun detect
+        if: env.OVERRUN != ''
+        run: exit_with_success
       - name: Restore Library directory from cache
         uses: actions/cache@v4
         with:
