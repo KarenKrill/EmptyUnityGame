@@ -72,7 +72,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo BUILD_RUN_ID=$(gh run list --commit 863ecfd5d4401f44f5721f1317c1bb771d45da60 --status success --workflow=BUILD_WORKFLOW_NAME --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
+          echo BUILD_RUN_ID=$(gh run list --commit 863ecfd5d4401f44f5721f1317c1bb771d45da60 --status success --workflow=$BUILD_WORKFLOW_NAME --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
           echo "BUILD_RUN_ID = $BUILD_RUN_ID"
       - name: No found completed build run
         if: env.BUILD_RUN_ID != ''
