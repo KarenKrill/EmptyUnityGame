@@ -86,10 +86,14 @@ jobs:
     outputs:
       WORKFLOW_CANCELLED: ${{ steps.ReleaseBuildsFound.outputs.WORKFLOW_CANCELLED }}
       BUILD_RUN_ID: ${{ env.BUILD_RUN_ID }}
-  GitHubReleasesDeploy:
+  CancelDetect:
     needs: [AnalyseVersions, AnalyseBuildWorkflow]
     if: needs.AnalyseBuildWorkflow.result == 'success' && needs.AnalyseBuildWorkflow.outputs.WORKFLOW_CANCELLED == 0
-    name: Deploy to GitHub releases
+    runs-on: ubuntu-latest
+  CreateRelease:
+    needs: [AnalyseVersions, CancelDetect]
+    if: needs.CancelDetect.result == 'success' && needs.AnalyseVersions.outputs.MAJOR_VERSION > 0
+    name: Create release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +101,6 @@ jobs:
           fetch-depth: 0
           lfs: true
       - name: Create release
-        if: needs.AnalyseVersions.outputs.MAJOR_VERSION > 0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
@@ -107,8 +110,17 @@ jobs:
             --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
             --generate-notes \
             --draft
+  CreatePreRelease:
+    needs: [AnalyseVersions, CancelDetect]
+    if: needs.CancelDetect.result == 'success' && needs.AnalyseVersions.outputs.MAJOR_VERSION == 0
+    name: Create pre-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
       - name: Create pre-release
-        if: needs.AnalyseVersions.outputs.MAJOR_VERSION == 0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
@@ -119,6 +131,12 @@ jobs:
             --generate-notes \
             --draft \
             --prerelease
+  UploadReleaseBuilds:
+    needs: [AnalyseBuildWorkflow, CreateRelease, CreatePreRelease]
+    if: needs.CreateRelease.result == 'success' || needs.CreatePreRelease.result == 'success'
+    name: Deploy to GitHub releases
+    runs-on: ubuntu-latest
+    steps:
       - name: Download artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
