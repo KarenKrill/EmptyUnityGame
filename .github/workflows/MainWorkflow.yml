@@ -141,7 +141,7 @@ jobs:
 
   UploadReleaseBuilds:
     needs: [AnalyseBuildWorkflow, CreateRelease, CreatePreRelease]
-    if: needs.CreateRelease.result == 'success' || needs.CreatePreRelease.result == 'success'
+    if: always() && (needs.CreateRelease.result == 'success' || needs.CreatePreRelease.result == 'success')
     name: Deploy to GitHub releases
     runs-on: ubuntu-latest
     steps:
@@ -153,6 +153,8 @@ jobs:
           mkdir -p artifacts
           gh run download $BUILD_RUN_ID --dir artifacts
       - name: Builds packing
+        env:
+          BUILD_VERSION: ${{ github.ref_name }}
         run: |
             cd artifacts
             for BUILD_DIR in *; do
@@ -160,10 +162,10 @@ jobs:
                 FILES_COUNT=$(($(ls "$BUILD_DIR" -1a | wc -l) - 2))
                 if (($FILES_COUNT == 1)); then # no need to pack a single file
                     FILENAME=$(ls "$BUILD_DIR" -1a | head -n 3 | tail -n 1) ## there are 3 files: ".", ".." and "single build file"
-                    echo $BUILD_DIR/$FILENAME moved to ${BUILD_DIR%*$BUILD_DIRECTORY_POSTFIX}.${FILENAME##*.}
-                    mv "$BUILD_DIR/$FILENAME" "${BUILD_DIR%*$BUILD_DIRECTORY_POSTFIX}.${FILENAME##*.}"
+                    echo $BUILD_DIR/$FILENAME moved to ${BUILD_DIR%*$BUILD_DIRECTORY_POSTFIX}.$BUILD_VERSION.${FILENAME##*.}
+                    mv "$BUILD_DIR/$FILENAME" "${BUILD_DIR%*$BUILD_DIRECTORY_POSTFIX}.$BUILD_VERSION.${FILENAME##*.}"
                 else # pack build files (except DontShip dir)
-                    BUILD_PACK_NAME="${BUILD_DIR%*$BUILD_DIRECTORY_POSTFIX}.zip"
+                    BUILD_PACK_NAME="${BUILD_DIR%*$BUILD_DIRECTORY_POSTFIX}.$BUILD_VERSION.zip"
                     echo $BUILD_PACK_NAME packing...
                     echo "Exclude: $BUILD_DIR/*DontShip*"
                     zip -r "$BUILD_PACK_NAME" "$BUILD_DIR" -x "$BUILD_DIR/*DontShip*"
