@@ -12,6 +12,7 @@ env:
     BUILD_WORKFLOW_NAME: BuildWorkflow.yml
 
 jobs:
+
   AnalyseVersions:
     if: startsWith(github.ref, 'refs/tags/')
     name: AnalyseVersions
@@ -57,6 +58,7 @@ jobs:
       WORKFLOW_CANCELLED: ${{ steps.DetectWorkflowCancel.outputs.WORKFLOW_CANCELLED }}
       MAJOR_VERSION: ${{ env.MAJOR_VERSION }}
       TAG_COMMIT_SHA: ${{ env.TAG_COMMIT_SHA }}
+
   AnalyseBuildWorkflow:
     needs: [AnalyseVersions]
     if: needs.AnalyseVersions.result == 'success' && needs.AnalyseVersions.outputs.WORKFLOW_CANCELLED == 0
@@ -86,10 +88,14 @@ jobs:
     outputs:
       WORKFLOW_CANCELLED: ${{ steps.ReleaseBuildsFound.outputs.WORKFLOW_CANCELLED }}
       BUILD_RUN_ID: ${{ env.BUILD_RUN_ID }}
+
   CancelDetect:
     needs: [AnalyseVersions, AnalyseBuildWorkflow]
     if: needs.AnalyseBuildWorkflow.result == 'success' && needs.AnalyseBuildWorkflow.outputs.WORKFLOW_CANCELLED == 0
     runs-on: ubuntu-latest
+    steps:
+      - run: exit 0
+  
   CreateRelease:
     needs: [AnalyseVersions, CancelDetect]
     if: needs.CancelDetect.result == 'success' && needs.AnalyseVersions.outputs.MAJOR_VERSION > 0
@@ -110,6 +116,7 @@ jobs:
             --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
             --generate-notes \
             --draft
+
   CreatePreRelease:
     needs: [AnalyseVersions, CancelDetect]
     if: needs.CancelDetect.result == 'success' && needs.AnalyseVersions.outputs.MAJOR_VERSION == 0
@@ -131,6 +138,7 @@ jobs:
             --generate-notes \
             --draft \
             --prerelease
+
   UploadReleaseBuilds:
     needs: [AnalyseBuildWorkflow, CreateRelease, CreatePreRelease]
     if: needs.CreateRelease.result == 'success' || needs.CreatePreRelease.result == 'success'
