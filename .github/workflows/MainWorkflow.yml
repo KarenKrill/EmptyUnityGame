@@ -154,9 +154,9 @@ jobs:
       - name: Builds packing
         env:
           BUILD_VERSION: ${{ github.ref_name }}
-          PROJECT_NAME: ${GITHUB_REPOSITORY#*/}
         run: |
             cd artifacts
+            PROJECT_NAME=${GITHUB_REPOSITORY#*/}
             for BUILD_DIR in *; do
               if [ -d "$BUILD_DIR" ]; then
                 BUILD_DIR_WITHOUT_PROJECT_NAME=${BUILD_DIR#PROJECT_NAME.}
