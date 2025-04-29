@@ -1,4 +1,4 @@
-name: MainWorkflow
+name: GitHubReleasesDeploy
 
 on:
   push:
@@ -13,9 +13,9 @@ env:
 
 jobs:
 
-  AnalyseVersions:
+  AnalyseVersionChanges:
+    name: Analyse version changes
     if: startsWith(github.ref, 'refs/tags/')
-    name: AnalyseVersions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,9 +59,9 @@ jobs:
       TAG_COMMIT_SHA: ${{ env.TAG_COMMIT_SHA }}
 
   AnalyseBuildWorkflow:
-    needs: [AnalyseVersions]
-    if: needs.AnalyseVersions.result == 'success' && needs.AnalyseVersions.outputs.WORKFLOW_CANCELLED == 0
-    name: AnalyseBuildWorkflow
+    name: Analyse build workflow
+    needs: [AnalyseVersionChanges]
+    if: needs.AnalyseVersionChanges.result == 'success' && needs.AnalyseVersionChanges.outputs.WORKFLOW_CANCELLED == 0
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +70,7 @@ jobs:
       - name: Find build run id
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG_COMMIT_SHA: ${{ needs.AnalyseVersions.outputs.TAG_COMMIT_SHA }}
+          TAG_COMMIT_SHA: ${{ needs.AnalyseVersionChanges.outputs.TAG_COMMIT_SHA }}
         run: |
           echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --status success --workflow=${{ env.BUILD_WORKFLOW_NAME }} --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
       - name: Print build run id
@@ -88,16 +88,17 @@ jobs:
       BUILD_RUN_ID: ${{ env.BUILD_RUN_ID }}
 
   CancelDetect:
-    needs: [AnalyseVersions, AnalyseBuildWorkflow]
+    name: Cancel detect
+    needs: [AnalyseVersionChanges, AnalyseBuildWorkflow]
     if: needs.AnalyseBuildWorkflow.result == 'success' && needs.AnalyseBuildWorkflow.outputs.WORKFLOW_CANCELLED == 0
     runs-on: ubuntu-latest
     steps:
       - run: exit 0
   
   CreateRelease:
-    needs: [AnalyseVersions, CancelDetect]
-    if: needs.CancelDetect.result == 'success' && needs.AnalyseVersions.outputs.MAJOR_VERSION > 0
     name: Create release
+    needs: [AnalyseVersionChanges, CancelDetect]
+    if: needs.CancelDetect.result == 'success' && needs.AnalyseVersionChanges.outputs.MAJOR_VERSION > 0
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -115,9 +116,9 @@ jobs:
             --draft
 
   CreatePreRelease:
-    needs: [AnalyseVersions, CancelDetect]
-    if: needs.CancelDetect.result == 'success' && needs.AnalyseVersions.outputs.MAJOR_VERSION == 0
     name: Create pre-release
+    needs: [AnalyseVersionChanges, CancelDetect]
+    if: needs.CancelDetect.result == 'success' && needs.AnalyseVersionChanges.outputs.MAJOR_VERSION == 0
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -136,15 +137,15 @@ jobs:
             --prerelease
 
   UploadReleaseBuilds:
+    name: Upload release builds
     needs: [AnalyseBuildWorkflow, CreateRelease, CreatePreRelease]
     if: always() && (needs.CreateRelease.result == 'success' || needs.CreatePreRelease.result == 'success')
-    name: Deploy to GitHub releases
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Download artifacts
+      - name: Download builds artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_RUN_ID: ${{ needs.AnalyseBuildWorkflow.outputs.BUILD_RUN_ID }}
@@ -180,7 +181,7 @@ jobs:
             echo "Packs list:"
             ls -l
             cd ..
-      - name: Upload artifacts to release
+      - name: Upload builds packs to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
