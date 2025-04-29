@@ -34,7 +34,7 @@ jobs:
           echo HEAD_COMMIT_SHA=$(git rev-parse HEAD) >> $env:GITHUB_ENV
       - name: Set environment variables 2
         run: |
-          ENV_PROJECT_NAME=$env:GITHUB_REPOSITORY.Split('/')[-1]
+          ENV_PROJECT_NAME=${{ env.GITHUB_REPOSITORY }}.Split('/')[-1]
           echo PROJECT_NAME=$ENV_PROJECT_NAME >> $env:GITHUB_ENV
       - name: Print environment variables
         run: |
