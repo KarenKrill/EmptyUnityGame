@@ -34,7 +34,8 @@ jobs:
           echo HEAD_COMMIT_SHA=$(git rev-parse HEAD) >> $env:GITHUB_ENV
       - name: Set environment variables 2
         run: |
-          echo PROJECT_NAME="${{ github.repository }}".Split('/')[-1] >> $env:GITHUB_ENV
+          $ENV_PROJECT_NAME="${{ github.repository }}".Split('/')[-1]
+          echo PROJECT_NAME=$ENV_PROJECT_NAME >> $env:GITHUB_ENV
       - name: Print environment variables
         run: |
           echo HEAD_COMMIT_SHA=${{ env.HEAD_COMMIT_SHA }}
