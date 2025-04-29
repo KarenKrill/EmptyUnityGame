@@ -32,14 +32,14 @@ jobs:
       - name: Set environment variables
         run: |
           echo HEAD_COMMIT_SHA=$(git rev-parse HEAD) >> $env:GITHUB_ENV
-      - name: Set environment variables 2
-        run: |
-          $ENV_PROJECT_NAME="${{ github.repository }}".Split('/')[-1]
+          $PROJECT_NAME_TEMP="${{ github.repository }}".Split('/')[-1]
           echo PROJECT_NAME=$ENV_PROJECT_NAME >> $env:GITHUB_ENV
       - name: Print environment variables
         run: |
           echo HEAD_COMMIT_SHA=${{ env.HEAD_COMMIT_SHA }}
           echo PROJECT_NAME=${{ env.PROJECT_NAME }}
+          echo PROJECT_NAME_TEMP=${{ env.PROJECT_NAME_TEMP }}
+          echo PROJECT_NAME_TEMP=$PROJECT_NAME_TEMP
       - name: Restore Library directory from cache
         uses: actions/cache@v4
         with:
