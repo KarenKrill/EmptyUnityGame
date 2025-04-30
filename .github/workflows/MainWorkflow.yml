@@ -151,7 +151,7 @@ jobs:
                     cd $BUILD_DIR
                     BUILD_PACK_NAME="$BUILD_NAME.zip"
                     echo $BUILD_PACK_NAME packing...
-                    zip -r $BUILD_PACK_NAME ./*
+                    zip -r ../$BUILD_PACK_NAME ./*
                     cd ..
                 fi
                 rm -rf "$BUILD_DIR"
