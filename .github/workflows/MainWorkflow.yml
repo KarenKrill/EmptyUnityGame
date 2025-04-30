@@ -74,7 +74,7 @@ jobs:
   CreateRelease:
     name: Create release
     needs: [ObtainVersionInfo, CancelDetect]
-    if: needs.CancelDetect.result == 'success' && needs.ObtainVersionInfo.outputs.MAJOR_VERSION > 0 && !endsWith(github.ref_name, alpha) && !endsWith(github.ref_name, beta)
+    if: needs.CancelDetect.result == 'success' && needs.ObtainVersionInfo.outputs.MAJOR_VERSION > 0 && !endsWith(github.ref_name, 'alpha') && !endsWith(github.ref_name, 'beta')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
   CreatePreRelease:
     name: Create pre-release
     needs: [ObtainVersionInfo, CancelDetect]
-    if: needs.CancelDetect.result == 'success' && (needs.ObtainVersionInfo.outputs.MAJOR_VERSION == 0 || endsWith(github.ref_name, alpha) || endsWith(github.ref_name, beta))
+    if: needs.CancelDetect.result == 'success' && (needs.ObtainVersionInfo.outputs.MAJOR_VERSION == 0 || endsWith(github.ref_name, 'alpha') || endsWith(github.ref_name, 'beta'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
