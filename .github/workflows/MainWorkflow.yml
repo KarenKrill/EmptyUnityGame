@@ -59,6 +59,7 @@ jobs:
             run_id: ${{ env.BUILD_RUN_ID }}
             repo: ${{ env.GITHUB_REPO }}
             owner: ${{ env.GITHUB_OWNER }}
+            run_timeout_seconds: 1800 # Timeout - 30 minutes
             poll_interval_ms: 5000 # Optional
     outputs:
       BUILD_RUN_ID: ${{ env.BUILD_RUN_ID }}
