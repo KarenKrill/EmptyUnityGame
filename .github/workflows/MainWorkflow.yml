@@ -72,25 +72,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG_COMMIT_SHA: ${{ needs.AnalyseVersionChanges.outputs.TAG_COMMIT_SHA }}
         run: |
-          echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --status success --workflow=${{ env.BUILD_WORKFLOW_NAME }} --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
+          echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --workflow=${{ env.BUILD_WORKFLOW_NAME }} --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
       - name: Print build run id
         run: echo "BUILD_RUN_ID = $BUILD_RUN_ID"
-      - name: Builds for release found
-        id: ReleaseBuildsFound
-        run: |
-            if [[ ${BUILD_RUN_ID:+x} ]]; then
-                echo WORKFLOW_CANCELLED=0 >> $GITHUB_OUTPUT
-            else
-                echo WORKFLOW_CANCELLED=1 >> $GITHUB_OUTPUT
-            fi
+      - name: Await Run ID ${{ env.BUILD_RUN_ID }}
+        uses: Codex-/await-remote-run@v1.0.0
+        with:
+            token: ${{ github.token }}
+            run_id: ${{ env.BUILD_RUN_ID }}
+            run_timeout_seconds: 100 # Optional
+            poll_interval_ms: 5000 # Optional
     outputs:
-      WORKFLOW_CANCELLED: ${{ steps.ReleaseBuildsFound.outputs.WORKFLOW_CANCELLED }}
       BUILD_RUN_ID: ${{ env.BUILD_RUN_ID }}
 
   CancelDetect:
     name: Cancel detect
     needs: [AnalyseVersionChanges, AnalyseBuildWorkflow]
-    if: needs.AnalyseBuildWorkflow.result == 'success' && needs.AnalyseBuildWorkflow.outputs.WORKFLOW_CANCELLED == 0
     runs-on: ubuntu-latest
     steps:
       - run: exit 0
