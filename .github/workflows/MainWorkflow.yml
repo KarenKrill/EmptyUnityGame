@@ -73,6 +73,8 @@ jobs:
           TAG_COMMIT_SHA: ${{ needs.AnalyseVersionChanges.outputs.TAG_COMMIT_SHA }}
         run: |
           echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --workflow=${{ env.BUILD_WORKFLOW_NAME }} --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
+          echo GITHUB_REPO=${GITHUB_REPOSITORY#*/} >> $GITHUB_ENV
+          echo GITHUB_OWNER=${GITHUB_REPOSITORY%/*} >> $GITHUB_ENV
       - name: Print build run id
         run: echo "BUILD_RUN_ID = $BUILD_RUN_ID"
       - name: Await Run ID ${{ env.BUILD_RUN_ID }}
@@ -80,8 +82,8 @@ jobs:
         with:
             token: ${{ github.token }}
             run_id: ${{ env.BUILD_RUN_ID }}
-            repo: ${GITHUB_REPOSITORY#*/}
-            owner: ${GITHUB_REPOSITORY%/*}
+            repo: ${{ env.GITHUB_REPO }}
+            owner: ${{ env.GITHUB_OWNER }}
             run_timeout_seconds: 100 # Optional
             poll_interval_ms: 5000 # Optional
     outputs:
