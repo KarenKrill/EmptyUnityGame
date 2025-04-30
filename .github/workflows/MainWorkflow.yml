@@ -73,18 +73,22 @@ jobs:
           TAG_COMMIT_SHA: ${{ needs.AnalyseVersionChanges.outputs.TAG_COMMIT_SHA }}
         run: |
           echo BUILD_RUN_ID=$(gh run list --commit ${{ env.TAG_COMMIT_SHA }} --workflow=${{ env.BUILD_WORKFLOW_NAME }} --json databaseId --jq '.[] | .databaseId') >> $GITHUB_ENV
-          echo GITHUB_REPO=${GITHUB_REPOSITORY#*/} >> $GITHUB_ENV
-          echo GITHUB_OWNER=${GITHUB_REPOSITORY%/*} >> $GITHUB_ENV
       - name: Print build run id
         run: echo "BUILD_RUN_ID = $BUILD_RUN_ID"
-      - name: Await Run ID ${{ env.BUILD_RUN_ID }}
+      - name: Get owner/repo names
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_COMMIT_SHA: ${{ needs.AnalyseVersionChanges.outputs.TAG_COMMIT_SHA }}
+        run: |
+          echo GITHUB_REPO=${GITHUB_REPOSITORY#*/} >> $GITHUB_ENV
+          echo GITHUB_OWNER=${GITHUB_REPOSITORY%/*} >> $GITHUB_ENV
+      - name: Await Build Run (${{ env.BUILD_WORKFLOW_NAME }}/${{ env.TAG_COMMIT_SHA }})
         uses: Codex-/await-remote-run@v1.0.0
         with:
             token: ${{ github.token }}
             run_id: ${{ env.BUILD_RUN_ID }}
             repo: ${{ env.GITHUB_REPO }}
             owner: ${{ env.GITHUB_OWNER }}
-            run_timeout_seconds: 100 # Optional
             poll_interval_ms: 5000 # Optional
     outputs:
       BUILD_RUN_ID: ${{ env.BUILD_RUN_ID }}
