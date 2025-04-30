@@ -151,7 +151,7 @@ jobs:
                     BUILD_PACK_NAME="$BUILD_NAME.zip"
                     echo $BUILD_PACK_NAME packing...
                     echo "Exclude: $BUILD_DIR/*DontShip*"
-                    zip -r "$BUILD_PACK_NAME" "$BUILD_DIR" -x "$BUILD_DIR/*DontShip*"
+                    zip -r $BUILD_PACK_NAME $BUILD_DIR/*
                 fi
                 rm -rf "$BUILD_DIR"
               fi
