@@ -80,6 +80,7 @@ jobs:
         with:
             token: ${{ github.token }}
             run_id: ${{ env.BUILD_RUN_ID }}
+            repo: ${{ github.repository }}
             run_timeout_seconds: 100 # Optional
             poll_interval_ms: 5000 # Optional
     outputs:
